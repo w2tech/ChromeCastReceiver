@@ -1,3 +1,9 @@
+"""
+Startet einen DHCP-Server mit udhcpd
+Erstellt eine temporäre Konfigurationsdatei
+Vergibt eine feste IP-Adresse an den Client
+"""
+
 class Dhcpd():
     """DHCP server daemon running in background."""
 
