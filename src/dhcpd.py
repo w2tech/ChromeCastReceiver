@@ -3,6 +3,10 @@ Startet einen DHCP-Server mit udhcpd
 Erstellt eine temporäre Konfigurationsdatei
 Vergibt eine feste IP-Adresse an den Client
 """
+import tempfile
+import subprocess
+import Settings from picast
+
 
 class Dhcpd():
     """DHCP server daemon running in background."""
