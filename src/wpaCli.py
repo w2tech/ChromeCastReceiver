@@ -1,3 +1,10 @@
+"""
+Wrapper für das wpa_cli Kommandozeilentool
+    Steuert die WiFi-Direct-Verbindung über das WPA-Supplicant-Subsystem
+    Methoden zum Konfigurieren und Verwalten von P2P-Verbindungen
+"""
+import subprocess
+
 class WpaCli:
     """
     Wraps the wpa_cli command line interface.
