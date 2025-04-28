@@ -18,6 +18,41 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 
+"""
+Übersicht
+PiCast ist eine Software, die einen Raspberry Pi in einen Miracast-kompatiblen drahtlosen Display-Empfänger verwandelt. Dies ermöglicht es, Bildschirminhalte von unterstützten 
+Geräten (wie Smartphones, Tablets oder Laptops) drahtlos auf einen mit dem Raspberry Pi verbundenen Monitor zu übertragen.
+Funktionsprinzip
+PiCast nutzt den WiFi Direct (P2P) Standard, um eine direkte Verbindung zwischen dem sendenden Gerät und dem Raspberry Pi herzustellen, ohne dass ein Router oder Access Point 
+benötigt wird. Für die Übertragung des Bildschirminhalts wird das Miracast-Protokoll verwendet, das auf RTSP (Real-Time Streaming Protocol) für die Aushandlung 
+und RTP (Real-time Transport Protocol) für die eigentliche Übertragung des Videoinhalts basiert.
+"""
+
+"""
+Systemanforderungen
+
+Raspberry Pi (getestet auf Raspberry Pi 3B+ und neueren Modellen)
+Kompatible WLAN-Karte mit WiFi Direct Unterstützung
+Betriebssystem: Raspberry Pi OS (ehemals Raspbian)
+Python 3
+Abhängigkeiten: GStreamer, GTK, verschiedene Python-Bibliotheken
+
+# Benötigte Pakete installieren
+sudo apt-get update
+sudo apt-get install -y python3-gi gstreamer1.0-plugins-base gstreamer1.0-plugins-good \
+  gstreamer1.0-plugins-bad gstreamer1.0-plugins-ugly gstreamer1.0-omx gstreamer1.0-tools \
+  udhcpd wpasupplicant
+
+# PiCast herunterladen und installieren
+git clone https://github.com/username/picast.git
+cd picast
+chmod +x picast.py
+
+Verwendung
+# PiCast starten
+sudo ./picast.py
+"""
+
 import errno # standard errno system symbols
 import fcntl # interface to the fcntl() unix routines
 import os # operating system dependent functionality
@@ -38,7 +73,9 @@ gi.require_version('GstVideo', '1.0')  # noqa: E402 # isort:skip
 gi.require_version('GdkX11', '3.0')  # noqa: E402 # isort:skip
 from gi.repository import Gst, Gtk  # noqa: E402 # isort:skip
 
-
+"""
+Definition statischer Attribute
+"""
 class Settings:
     wp_device_name = 'picast'
     wp_device_type = "7-0050F204-1"
@@ -53,7 +90,10 @@ class Settings:
 
 
 class Dhcpd():
-    """DHCP server daemon running in background."""
+    """DHCP server daemon running in background.
+    Implementiert einen einfachen DHCP-Server
+Weist dem verbundenen Gerät eine feste IP-Adresse zu
+    """
 
     def __init__(self, interface):
         """Constructor accept an interface to listen."""
@@ -236,6 +276,9 @@ class PiCastException(Exception):
 class WpaCli:
     """
     Wraps the wpa_cli command line interface.
+    Wrapper für das wpa_cli Kommandozeilenwerkzeug
+Verwaltet WiFi Direct-Verbindungen
+Konfiguriert P2P-Schnittstellen
     """
 
     def __init__(self):
@@ -321,7 +364,22 @@ class WpaCli:
 
 
 class PiCast:
+    """
+    Implementiert den RTSP-Server
+    Führt die Miracast-Protokollaushandlung durch
+    Verarbeitet laufende Kontrollanfragen
 
+    RTSP-Protokollablauf
+Die Miracast-Verbindung erfolgt über eine spezifische RTSP-Aushandlungssequenz:
+
+M1: Client sendet OPTIONS, Server antwortet mit unterstützten Methoden
+M2: Server sendet REQUIRE mit WFD-Unterstützungsanforderung
+M3: Client sendet GET_PARAMETER, Server antwortet mit unterstützten Videoformaten
+M4: Client sendet SET_PARAMETER mit gewähltem Format, Server bestätigt
+M5: Client sendet TRIGGERED-METHOD, Server bestätigt
+M6: Server initiiert SETUP für den Stream und erhält Session-ID
+M7: Server sendet PLAY, um die Übertragung zu starten
+    """
     def __init__(self, window):
         self.logger = getLogger("PiCast")
         self.window = window
@@ -523,6 +581,10 @@ class PiCast:
 
 
 class WifiP2PServer:
+    """
+    Nutzt GStreamer zur Dekodierung und Anzeige des H.264-Videostreams
+Verwendet Hardware-Beschleunigung (OMX) für effiziente Dekodierung
+"""
 
     def start(self):
         self.set_p2p_interface()
@@ -585,6 +647,10 @@ class WifiP2PServer:
 
 
 class GstPlayer(Gtk.Window):
+    """
+    Nutzt GStreamer zur Dekodierung und Anzeige des H.264-Videostreams
+    Verwendet Hardware-Beschleunigung (OMX) für effiziente Dekodierung
+    """
     def __init__(self):
         self.logger = getLogger("PiCast:GstPlayer")
         gstcommand = "udpsrc port={0:d} caps=\"application/x-rtp, media=video\" ".format(Settings.rtp_port)
