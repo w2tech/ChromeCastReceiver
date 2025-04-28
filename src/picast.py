@@ -18,18 +18,18 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 
-import errno
-import fcntl
-import os
-import re
-import socket
-import subprocess
-import tempfile
-import threading
+import errno # standard errno system symbols
+import fcntl # interface to the fcntl() unix routines
+import os # operating system dependent functionality
+import re # Regular expression operations
+import socket # Low-level networking interface
+import subprocess # spawn new processes, connect to their input/output/error pipes
+import tempfile # Generate temporary files and directories
+import threading # Thread-based parallelism
 from logging import DEBUG, StreamHandler, getLogger
 from time import sleep
 
-import gi
+import gi # GObject Introspection
 
 os.putenv('DISPLAY', ':0')  # noqa: E402 # isort:skip
 gi.require_version('Gst', '1.0')  # noqa: E402 # isort:skip
